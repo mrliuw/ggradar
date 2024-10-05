@@ -1,7 +1,7 @@
 ggradar_alternative <- function(
     data, 
-    data.max = data |> 
-      select(-1) |> 
+    data.max = data %>% 
+      select(-1) %>% 
       max(), # the maximum value which other values should be divided by to get 
     # a percentage 
     gridline.value = seq(20, 100, 20), 
@@ -41,12 +41,12 @@ ggradar_alternative <- function(
   }
   library(RColorBrewer)
 
-  data <- data |> 
+  data <- data %>% 
     select(-1) / 
     data.max *
     100
   two_pi <- 2 * pi
-  n_axis <- axis.label |> 
+  n_axis <- axis.label %>% 
     length()
   gridline_angle <- seq(0, two_pi, two_pi / n_axis)
   n_gridline_value <- length(gridline.value)
@@ -59,14 +59,14 @@ ggradar_alternative <- function(
       if(i == 1) {
         path <- tibble(x = value_i * sin_angle, y = value_i * cos_angle)
       } else {
-        path <- path |> 
+        path <- path %>% 
         add_row(x = value_i * sin_angle, y = value_i * cos_angle)
       }
     }
     path
   }
-  gridline_path <- gridline.value |> 
-    generate_path(gridline_angle) |> 
+  gridline_path <- gridline.value %>% 
+    generate_path(gridline_angle) %>% 
     mutate(group = rep(gridline.value, each = n_gridline_angle))
   gridline_color <- NULL
   gridline_linewidth <- NULL
@@ -98,12 +98,12 @@ ggradar_alternative <- function(
   # one since 2pi = 0
   maximum <- max(gridline.value)
   colnames(data)[1] <- "State"
-  state <- data |> 
+  state <- data %>% 
     pull(State)
-  n_state <- state |> 
+  n_state <- state %>% 
     length()
-  axis_path <- c(0, maximum) |> 
-    generate_path(axis_angle) |> 
+  axis_path <- c(0, maximum) %>% 
+    generate_path(axis_angle) %>% 
     mutate(group = rep(1:n_axis, 2))
   ## label
   axis_label <- tibble(
@@ -114,17 +114,17 @@ ggradar_alternative <- function(
   
   # radar
   radar_angle <- c(gridline_angle, 2 * pi)
-  radar_value1 <- data |> 
+  radar_value1 <- data %>% 
     pull(2)
-  radar_value <- data |> 
-    select(-1) |> 
-    mutate(value_last2 = radar_value1, value_last1 = radar_value1) |> 
+  radar_value <- data %>% 
+    select(-1) %>% 
+    mutate(value_last2 = radar_value1, value_last1 = radar_value1) %>% 
     t()
-  sin_radar_angle_n_state <- radar_angle |> 
-    sin() |> 
+  sin_radar_angle_n_state <- radar_angle %>% 
+    sin() %>% 
     rep(n_state)
-  cos_radar_angle_n_state <- radar_angle |> 
-    cos() |> 
+  cos_radar_angle_n_state <- radar_angle %>% 
+    cos() %>% 
     rep(n_state)
   for (i in 1:length(radar_value)) {
     radar_value_i <- radar_value[i]
@@ -136,14 +136,14 @@ ggradar_alternative <- function(
       y = radar_value_i * cos_radar_angle_n_state_i
       )
     } else {
-      radar_path <- radar_path |> 
+      radar_path <- radar_path %>% 
       add_row(
         x = radar_value_i * sin_radar_angle_n_state_i, 
         y = radar_value_i * cos_radar_angle_n_state_i
       )
     }
   }
-  radar_path <- radar_path |> 
+  radar_path <- radar_path %>% 
     mutate(group = rep(as.character(state), each = length(radar_angle)))
   
   # plotting
@@ -225,8 +225,8 @@ ggradar_alternative <- function(
     } else {
       repetition <- n_state %/% 8
       modulo <- n_state %% 8
-      color <- brewer.pal(n = 8, name = "Accent") |> 
-        rep(repetition) |> 
+      color <- brewer.pal(n = 8, name = "Accent") %>% 
+        rep(repetition) %>% 
         c(brewer.pal(n = modulo, name = "Accent"))
       radar_plot <- radar_plot +
         scale_color_manual(values = color)
